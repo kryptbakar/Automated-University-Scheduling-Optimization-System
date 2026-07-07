@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automated University Scheduling Optimization System</title>
+<style>
+  :root {
+    --bg: #f5f6fa;
+    --bg-alt: #ffffff;
+    --text: #1b1e28;
+    --text-muted: #565c6e;
+    --accent: #2a4d8f;
+    --accent-2: #b3862f;
+    --border: #dcdfe6;
+    --card-shadow: 0 1px 3px rgba(20,24,40,0.08), 0 1px 2px rgba(20,24,40,0.06);
+    --grid-line: #e2e5ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10121a;
+      --bg-alt: #171a24;
+      --text: #e8e9ee;
+      --text-muted: #9aa0b4;
+      --accent: #7fa2e0;
+      --accent-2: #d9ab5c;
+      --border: #2a2e3d;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+      --grid-line: #232734;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: var(--accent); }
+
+  .hero {
+    position: relative;
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-color: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--bg-alt) 0%, transparent 75%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; max-width: 780px; margin: 0 auto; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+    margin: 0 0 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .tagline {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .badges { margin-top: 1.75rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  main { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+  section { padding: 3.5rem 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  h2::before {
+    content: "";
+    width: 6px; height: 1.3rem;
+    background: var(--accent);
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .about p { color: var(--text-muted); max-width: 68ch; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+  }
+  .feature-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: var(--card-shadow);
+  }
+  .feature-card .icon { font-size: 1.3rem; margin-bottom: 0.4rem; display: block; }
+  .feature-card strong { display: block; margin-bottom: 0.25rem; font-size: 0.98rem; }
+  .feature-card span.desc { color: var(--text-muted); font-size: 0.88rem; }
+
+  .constraints-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 640px) { .constraints-grid { grid-template-columns: 1fr; } }
+  .constraints-grid h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 0 0 0.6rem;
+  }
+  .constraints-grid ul { margin: 0; padding-left: 1.1rem; }
+  .constraints-grid li { margin-bottom: 0.4rem; font-size: 0.94rem; }
+
+  .stack-tags { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+  .tag {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+  }
+
+  .timetable-mock {
+    margin-top: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-alt);
+    box-shadow: var(--card-shadow);
+  }
+  .tt-row { display: grid; grid-template-columns: 90px repeat(5, 1fr); }
+  .tt-row + .tt-row { border-top: 1px solid var(--grid-line); }
+  .tt-cell {
+    padding: 0.55rem 0.5rem;
+    font-size: 0.78rem;
+    border-left: 1px solid var(--grid-line);
+    color: var(--text-muted);
+    min-height: 1.2rem;
+  }
+  .tt-cell:first-child { border-left: none; font-weight: 600; color: var(--text); background: var(--bg); }
+  .tt-head { background: var(--bg); font-weight: 700; color: var(--text); }
+  .tt-fill {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent-2) 10%, transparent));
+    border-radius: 5px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem 3rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .repo-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.55rem 1.3rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: var(--card-shadow);
+  }
+  .repo-link:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">GIK Institute · CS378 Final Project</span>
+    <h1>Automated University Scheduling Optimization System</h1>
+    <p class="tagline">A constraint-driven timetable generator that turns a raw course list into a conflict-free, semester-ready weekly schedule — in seconds.</p>
+    <div class="badges">
+      <span class="badge">Python 3.10+</span>
+      <span class="badge">Greedy CSP Solver</span>
+      <span class="badge">CustomTkinter GUI</span>
+      <span class="badge">Excel Export</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <section class="about">
+    <h2>About</h2>
+    <p>
+      This project automates semester timetable generation for GIK Institute's Spring 2026 catalogue.
+      It models scheduling as a Constraint Satisfaction Problem and solves it with a greedy CSP solver:
+      each course session is assigned to a feasible (day, time, room) tuple while a rule-based constraint
+      checker enforces hard constraints such as teacher, room, and section conflicts using O(1) hash-map
+      lookups. On top of the hard constraints, soft objectives — day-load balancing, consecutive-slot
+      penalties, and capacity-aware room fallback — shape the result toward a well-balanced, realistic
+      weekly grid (Mon–Fri) that mirrors the institution's official timetable layout.
+    </p>
+  </section>
+
+  <section class="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="icon">🗓️</span>
+        <strong>Weekly Recurring Grid</strong>
+        <span class="desc">Builds a single Mon–Fri schedule that every teaching week of the semester follows.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🧩</span>
+        <strong>Greedy CSP Solver</strong>
+        <span class="desc">Rule-based constraint checking assigns sessions into feasible day/time/room slots.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🚫</span>
+        <strong>Conflict Prevention</strong>
+        <span class="desc">Blocks teacher, room, and section double-bookings automatically.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔒</span>
+        <strong>Room Locking</strong>
+        <span class="desc">Multi-session courses stay anchored to a single, consistent room.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📄</span>
+        <strong>PDF-Aware Slot Rules</strong>
+        <span class="desc">Reproduces institutional quirks, including the shifted Friday morning grid.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🖥️</span>
+        <strong>Dual Workflow</strong>
+        <span class="desc">CustomTkinter GUI for one-click generation, plus a CLI for headless batch runs.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📊</span>
+        <strong>Excel Export</strong>
+        <span class="desc">Outputs a room × slot grid grouped by building, color-coded by department.</span>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📈</span>
+        <strong>Stats View</strong>
+        <span class="desc">Per-day and per-building load statistics surfaced right in the GUI.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="constraints">
+    <h2>Constraint Model</h2>
+    <div class="constraints-grid">
+      <div>
+        <h3>Hard constraints (always enforced)</h3>
+        <ul>
+          <li>No teacher double-booked</li>
+          <li>No room double-booked</li>
+          <li>No section taught twice on the same day</li>
+          <li>All sessions of a course share one locked room</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Soft objectives (optimized when possible)</h3>
+        <ul>
+          <li>Day-load balancing, with Friday seeded lighter</li>
+          <li>Penalty for 3 consecutive slots on one instructor</li>
+          <li>Capacity-aware room allocation with fallback</li>
+          <li>Last-resort virtual/TBA lab fallback</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timetable-mock">
+      <div class="tt-row tt-head">
+        <div class="tt-cell">Room</div>
+        <div class="tt-cell">Mon</div>
+        <div class="tt-cell">Tue</div>
+        <div class="tt-cell">Wed</div>
+        <div class="tt-cell">Thu</div>
+        <div class="tt-cell">Fri</div>
+      </div>
+      <div class="tt-row">
+        <div class="tt-cell">A-101</div>
+        <div class="tt-cell tt-fill">CS378</div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell tt-fill">CS378</div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell tt-fill">CS210</div>
+      </div>
+      <div class="tt-row">
+        <div class="tt-cell">B-204</div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell tt-fill">EE301</div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell tt-fill">EE301</div>
+        <div class="tt-cell"></div>
+      </div>
+      <div class="tt-row">
+        <div class="tt-cell">Lab-3</div>
+        <div class="tt-cell tt-fill">CS220L</div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell"></div>
+        <div class="tt-cell tt-fill">CS220L</div>
+        <div class="tt-cell"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <h2>Tech Stack</h2>
+    <div class="stack-tags">
+      <span class="tag">Python 3.10+</span>
+      <span class="tag">Greedy CSP Solver</span>
+      <span class="tag">CustomTkinter</span>
+      <span class="tag">pandas</span>
+      <span class="tag">openpyxl</span>
+      <span class="tag">xlsxwriter</span>
+      <span class="tag">OR-Tools (optional fallback)</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>GIK Institute · CS378 — Design and Analysis of Algorithms · Spring 2026</div>
+  <a class="repo-link" href="https://github.com/kryptbakar/Automated-University-Scheduling-Optimization-System">View on GitHub</a>
+</footer>
+
+</body>
+</html>
